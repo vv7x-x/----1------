@@ -1,0 +1,29 @@
+{
+  "120363420279577635@g.us": true,
+  "120363418757064225@g.us": true,
+  "links_120363400346026172@g.us": {
+    "enabled": true,
+    "warnings": {}
+  },
+  "120363418245184496@g.us": true,
+  "links_120363420393378323@g.us": {
+    "enabled": true,
+    "warnings": {}
+  },
+  "links_120363338699983236@g.us": {
+    "enabled": true,
+    "warnings": {
+      "271738940170469@lid": 2
+    }
+  },
+  "links_120363418394949594@g.us": {
+    "enabled": true,
+    "warnings": {
+      "51772139802683@lid": 2
+    }
+  },
+  "links_120363415151885203@g.us": {
+    "enabled": true,
+    "warnings": {}
+  }
+}

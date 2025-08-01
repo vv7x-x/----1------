@@ -1,0 +1,22 @@
+module.exports = {
+  command: 'تست',
+  description: 'اختبار البوت',
+  usage: '.كيساكي',
+  category: 'tools',
+
+  async execute(sock, msg) {
+    try {
+      await sock.sendMessage(msg.key.remoteJid, {
+        react: {
+          text: '🍷',
+          key: msg.key
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error reacting to message:', error);
+      await sock.sendMessage(msg.key.remoteJid, {
+        text: '❌ حصل خطأ أثناء تنفيذ الأمر.'
+      }, { quoted: msg });
+    }
+  }
+};
