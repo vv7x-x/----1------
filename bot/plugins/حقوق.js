@@ -3,7 +3,7 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const decorate = (text) => `╭──⪧\n🍷 *${كيساكي المز}*\n╰──⪦`;
+const decorate = (text) => `╭──⪧\n🍷 *${يحيى المز}*\n╰──⪦`;
 
 module.exports = {
   command: 'حقوقي',

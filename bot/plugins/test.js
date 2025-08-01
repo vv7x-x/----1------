@@ -9,7 +9,7 @@ module.exports = {
 
   async execute(sock, msg) {
     try {
-      const fancyText = `𝑲𝒊𝒔𝒂𝒌𝒊 𝑷𝒂𝒔𝒔𝒆𝒅 𝑩𝒚 𝑯𝒆𝒓𝒆 🍷`;
+      const fancyText = `yahya 𝑷𝒂𝒔𝒔𝒆𝒅 𝑩𝒚 𝑯𝒆𝒓𝒆 🍷`;
 
       const imagePath = path.join(__dirname, '../media/image.jpeg');
       const hasImage = fs.existsSync(imagePath);
@@ -21,11 +21,11 @@ module.exports = {
           text: fancyText,
           contextInfo: {
             externalAdReply: {
-              title: "𝑲𝒊𝒔𝒂𝒌𝒊 𝐌𝐍1🪽",
+              title: "yahya 𝐌𝐍1🪽",
               body: "جرب تلعب معا MN1 و نشوف اخرتها 💀🔥",
               thumbnail: imageBuffer,
               mediaType: 1,
-              sourceUrl: "https://t.me/Sanji_Bot_Channel",
+              sourceUrl: "لسه يقلبي",
               renderLargerThumbnail: false,
               showAdAttribution: true
             }

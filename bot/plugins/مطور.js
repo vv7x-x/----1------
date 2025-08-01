@@ -11,19 +11,22 @@ module.exports = {
 
   async execute(sock, msg) {
     try {
-      const developerNumber1 = '201505217591@s.whatsapp.net';
+      const developerNumber1 = '201155528093@s.whatsapp.net';
       const developerEmail = '';
 
       const vcard1 = `BEGIN:VCARD
 VERSION:3.0
-FN:❃𝑲𝑰𝑺𝑨𝑲𝑰
-TEL;waid=201507093714:+201505217591
+FN:❃يحيى رضا❃
+TEL;waid=201155528093:+201155528093
+EMAIL:${developerEmail}
+NOTE:الرقم ليس بوت، لو كتبت أوامر بيعطيك بلوك 🦈
 END:VCARD`;
 
       const vcard2 = `BEGIN:VCARD
 VERSION:3.0
-FN:𝑲𝑰𝑺𝑨𝑲𝑰
-TEL;waid=201507093714:+201505217591
+FN:❃يحيى رضا❃   
+TEL;waid=201155528093:+201155528093
+TEL;waid=201505217591
 EMAIL:${developerEmail}
 NOTE:الرقم ليس بوت، لو كتبت أوامر بيعطيك بلوك 🦈
 END:VCARD`;
@@ -31,7 +34,7 @@ END:VCARD`;
       // إرسال جهتي الاتصال دفعة واحدة
       await sock.sendMessage(msg.key.remoteJid, {
         contacts: {
-          displayName: "𝑲𝑰𝑺𝑨𝑲𝑰",
+          displayName: "❃ يحيى رضا ❃",
           contacts: [
             { vcard: vcard1 },
             { vcard: vcard2 }
@@ -39,7 +42,7 @@ END:VCARD`;
         }
       }, { quoted: msg });
 
-      const instructionsText = `┃ مرحباً بك، هذا هو كيساكي مطوري ↯↯
+      const instructionsText = `┃ مرحباً بك، هذا هو يحيى مطوري ↯↯
 
 > *تعليمات قبل الدخول إليه لتجنب الحظر منه، الرجاء قراءتها قبل الدخول إليه*
 
@@ -57,7 +60,7 @@ END:VCARD`;
             title: 'مطور البوت',
             body: 'رابط مجموعه الدعم',
             thumbnail: thumbnailBuffer,
-            mediaUrl: 'https://chat.whatsapp.com/KQS2w3iFt286pROPUiSZnV?mode=ac_t',
+            mediaUrl: 'مفيش لسه يقلبي🌹',
           }
         }
       }, { quoted: msg });
