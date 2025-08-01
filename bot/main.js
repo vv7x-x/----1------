@@ -59,7 +59,7 @@ async function startBot() {
         console.log(chalk.hex('#FFD700').bold('\nجميع الحقوق محفوظة لـ 𝐌𝐍1 ©\n'));
         logEvent('تشغيل البوت');
 
-        playSound('ANASTASIA.mp3');
+        playSound('kw-8.mp3');
 
         const sessionDir = path.join(__dirname, 'ملف_الاتصال');
         await fs.ensureDir(sessionDir);

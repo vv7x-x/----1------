@@ -1,11 +1,11 @@
 let prefix = '';
 
 module.exports = {
-    botName: 'Anastasia',
+    botName: 'kw-8',
     version: '2.5.0',
     owner: '972532731932',
 
-    defaultPrefix: '#',
+    defaultPrefix: '.',
     get prefix() {
         return prefix;
     },
