@@ -1,4 +1,4 @@
-let prefix = '';
+let prefix = '.';
 
 module.exports = {
     botName: 'kw-8',
