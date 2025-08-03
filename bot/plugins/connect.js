@@ -1,8 +1,10 @@
-import fs from 'fs';
-import path from 'path';
-import chalk from 'chalk';
-import { exec } from 'child_process';
+const fs = require('fs');
+const path = require('path');
+const chalk = require('chalk');
+const { exec } = require('child_process');
+
 const pendingInstallations = new Map();
+
 const createNewConnectionFile = async (phoneNumber, prefix = 'co') => {
     const connectionFolderName = `${prefix}${phoneNumber}`;
     const connectionFolderPath = path.join(process.cwd(), connectionFolderName);
@@ -14,6 +16,7 @@ const createNewConnectionFile = async (phoneNumber, prefix = 'co') => {
     }
     return connectionFolderPath;
 };
+
 const startNewBot = (connectionFolderPath, phoneNumber, sock, m) => {
     return new Promise((resolve, reject) => {
         try {
@@ -27,7 +30,6 @@ const startNewBot = (connectionFolderPath, phoneNumber, sock, m) => {
                 fs.mkdirSync(connectionSubFolderPath, { recursive: true });
                 console.log(chalk.green(`✅ تم إنشاء مجلد الاتصال: ${connectionName}`));
             }
-           const elitePath = path.join(connectionFolderPath, 'haykala', 'elite.js');
             if (!fs.existsSync(path.join(connectionFolderPath, 'haykala'))) {
                 fs.mkdirSync(path.join(connectionFolderPath, 'haykala'), { recursive: true });
             }
@@ -38,20 +40,23 @@ const startNewBot = (connectionFolderPath, phoneNumber, sock, m) => {
                 timestamp: new Date().toISOString()
             };
             fs.writeFileSync(connectionInfoPath, JSON.stringify(connectionInfo, null, 2), 'utf8');
+
             const setupScript = `
-import fs from 'fs';
-import path from 'path';
-import pino from 'pino';
-import http from 'http';
-import { createServer } from 'http';
-import {makeWASocket, useMultiFileAuthState, DisconnectReason} from '@whiskeysockets/baileys';
-import NodeCache from 'node-cache';
-import { exec } from 'child_process';
+const fs = require('fs');
+const path = require('path');
+const pino = require('pino');
+const http = require('http');
+const { createServer } = require('http');
+const { makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
+const NodeCache = require('node-cache');
+const { exec } = require('child_process');
+
 const connectionFolderName = path.basename(process.cwd());
 const connectionInfoPath = path.join(process.cwd(), 'connection_info.json');
 const connectionInfo = JSON.parse(fs.readFileSync(connectionInfoPath, 'utf8'));
 const phoneNumber = connectionInfo.phone;
 const originalChatId = connectionInfo.chatId;
+
 const server = createServer((req, res) => {
     if (req.url === '/pairing-code' && req.method === 'POST') {
         let body = '';
@@ -62,14 +67,13 @@ const server = createServer((req, res) => {
             try {
                 const data = JSON.parse(body);
                 if (data.code) {
-                    fs.writeFileSync(path.join(process.cwd(), '..', 'pairing_code.txt'), 
-                        JSON.stringify({ 
-                            code: data.code, 
-                            phone: phoneNumber, 
+                    fs.writeFileSync(path.join(process.cwd(), '..', 'pairing_code.txt'),
+                        JSON.stringify({
+                            code: data.code,
+                            phone: phoneNumber,
                             chatId: originalChatId,
                             timestamp: new Date().toISOString()
                         }, null, 2));
-                    
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ success: true }));
                 } else {
@@ -96,15 +100,15 @@ const savePairingCode = async (code) => {
     try {
         fs.writeFileSync(path.join(process.cwd(), 'pairing_code.txt'), code);
         console.log(\`🔐 Pairing code saved: \${code}\`);
-        
-        fs.writeFileSync(path.join(process.cwd(), '..', 'pairing_code.txt'), 
-            JSON.stringify({ 
+
+        fs.writeFileSync(path.join(process.cwd(), '..', 'pairing_code.txt'),
+            JSON.stringify({
                 code,
-                phone: phoneNumber, 
+                phone: phoneNumber,
                 chatId: originalChatId,
                 timestamp: new Date().toISOString()
             }, null, 2));
-            
+
         const options = {
             hostname: 'localhost',
             port: port,
@@ -114,15 +118,15 @@ const savePairingCode = async (code) => {
                 'Content-Type': 'application/json'
             }
         };
-        
+
         const req = http.request(options, res => {
             console.log(\`STATUS: \${res.statusCode}\`);
         });
-        
+
         req.on('error', error => {
             console.error('Error sending code to server:', error);
         });
-        
+
         req.write(JSON.stringify({ code }));
         req.end();
     } catch (error) {
@@ -133,12 +137,12 @@ const savePairingCode = async (code) => {
 const startInstallation = async () => {
     const currentFolderPath = process.cwd();
     const connectionFolderName = path.basename(currentFolderPath);
-    
+
     if (!fs.existsSync(connectionFolderName)) {
         fs.mkdirSync(connectionFolderName, { recursive: true });
         console.log(\`✅ تم إنشاء ملف الاتصال: \${connectionFolderName}\`);
     }
-    
+
     const { state, saveCreds } = await useMultiFileAuthState(connectionFolderName);
     const sock = makeWASocket({
         auth: state,
@@ -146,16 +150,16 @@ const startInstallation = async () => {
         browser: ['Mac OS', 'Chrome', '12.1.0.166.117'],
         version: [2, 3000, 1015901300]
     });
-    
+
     let connectionReady = false;
     sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
         if (connection === 'open') {
             connectionReady = true;
         }
     });
-    
+
     await new Promise(resolve => setTimeout(resolve, 5000));
-    
+
     try {
         if (!sock.authState.creds.registered) {
             const code = await sock.requestPairingCode(phoneNumber);
@@ -164,9 +168,9 @@ const startInstallation = async () => {
         }
     } catch (error) {
         console.error("❌ An error occurred while connecting to the file: " + error.message);
-        
+
         await new Promise(resolve => setTimeout(resolve, 10000));
-        
+
         try {
             const code = await sock.requestPairingCode(phoneNumber);
             console.log(\`🔐 تم الحصول على كود الاقتران (المحاولة الثانية): \${code}\`);
@@ -179,7 +183,7 @@ const startInstallation = async () => {
     sock.ev.on('creds.update', saveCreds);
     sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
         if (connection === 'close') {
-            if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut) 
+            if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut)
                 startInstallation();
         } else if (connection === 'open') {
             // Start the bot after successful connection
@@ -189,11 +193,11 @@ const startInstallation = async () => {
                     cwd: process.cwd(),
                     shell: true
                 });
-                
+
                 child.stdout.on('data', (data) => {
                     console.log('🤖 Bot Output:', data);
                 });
-                
+
                 child.stderr.on('data', (data) => {
                     console.error('❌ Bot Error:', data);
                 });
@@ -206,19 +210,20 @@ const startInstallation = async () => {
 
 startInstallation();
 `;
-            
+
             fs.writeFileSync(path.join(connectionFolderPath, 'setup.js'), setupScript, 'utf8');
 
             let modifiedContent = indexContent.replace(
-                "useMultiFileAuthState('ملف_الاتصال')", 
+                "useMultiFileAuthState('ملف_الاتصال')",
                 "useMultiFileAuthState(path.basename(process.cwd()))"
             );
 
-            if (!modifiedContent.includes("import path from 'path';")) {
-                modifiedContent = "import path from 'path';\n" + modifiedContent;
+            if (!modifiedContent.includes("const path = require('path');")) {
+                modifiedContent = "const path = require('path');\n" + modifiedContent;
             }
             fs.writeFileSync(targetPath, modifiedContent, 'utf8');
             console.log(chalk.green(`✅ تم إنشاء ملف index.js في المجلد الجديد ليستخدم اسم المجلد الحالي كملف اتصال`));
+
             const copyRecursively = (source, target) => {
                 if (!fs.existsSync(target)) {
                     fs.mkdirSync(target, { recursive: true });
@@ -227,7 +232,7 @@ startInstallation();
 
                 for (const entry of entries) {
                     const sourcePath = path.join(source, entry.name);
-                    const targetPath = path.join(target, entry.name);     
+                    const targetPath = path.join(target, entry.name);
                     if (entry.isDirectory()) {
                         copyRecursively(sourcePath, targetPath);
                     } else {
@@ -295,31 +300,25 @@ startInstallation();
                 try {
                     const elitePath = path.join(connectionFolderPath, 'haykala', 'elite.js');
                     let eliteContent = '';
-                    
+
                     if (fs.existsSync(elitePath)) {
                         eliteContent = fs.readFileSync(elitePath, 'utf8');
                         if (!eliteContent.includes(`'${phoneNumber}@s.whatsapp.net'`)) {
-                            eliteContent = eliteContent.replace(
-                            );
+                            // هنا ممكن تضيف كود التعديل على eliteContent إذا احتجت
                         }
                     } else {
-` +
-                        `export const formatEliteNumber = (number) => {
-` +
-                        `    if (!number) return '';
-` +
-                        `    const cleaned = number.toString().replace(/\\D/g, '');
-` +
-                        `    return cleaned.endsWith('@s.whatsapp.net') ? cleaned : \`\${cleaned}@s.whatsapp.net\`;
-` +
-                        `};
-` +
-` +
-                        `const elite = {name: 'Elite Bot'};
+                        eliteContent = `module.exports.formatEliteNumber = (number) => {
+    if (!number) return '';
+    const cleaned = number.toString().replace(/\\D/g, '');
+    return cleaned.endsWith('@s.whatsapp.net') ? cleaned : \`\${cleaned}@s.whatsapp.net\`;
+};
+
+const elite = {name: 'Elite Bot'};
 `;
                     }
                     fs.writeFileSync(elitePath, eliteContent, 'utf8');
                     console.log(chalk.green(`✅ تم تحديث ملف elite.js وإضافة الرقم ${phoneNumber}`));
+
                     const child = exec(`cd "${connectionFolderPath}" && node setup.js`, (error, stdout, stderr) => {
                         if (error) {
                             console.error('❌', chalk.white(chalk.bgRed(` An error occurred while connecting to the file: ${error.message}`)));
@@ -344,35 +343,36 @@ startInstallation();
         }
     });
 };
-export const handleInstallationMessage = async (text, m, sock) => {
+
+const handleInstallationMessage = async (text, m, sock) => {
     try {
         if (m.key.remoteJid.endsWith('@g.us')) {
             return false;
         }
-        const messageContent = text || 
-            m.message?.conversation || 
+        const messageContent = text ||
+            m.message?.conversation ||
             m.message?.extendedTextMessage?.text ||
             m.text ||
             (typeof m.message === 'string' ? m.message : null);
         const isReplyToBot = (m.message?.extendedTextMessage?.contextInfo?.participant === sock.user.id ||
-                             m.message?.extendedTextMessage?.contextInfo?.mentionedJid?.includes(sock.user.id)) &&
-                            m.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+            m.message?.extendedTextMessage?.contextInfo?.mentionedJid?.includes(sock.user.id)) &&
+            m.message?.extendedTextMessage?.contextInfo?.quotedMessage;
         if (/^\d+$/.test(messageContent?.trim() || '') && !isReplyToBot) {
             return false;
         }
         if (isReplyToBot && /^\d+$/.test(messageContent?.trim() || '')) {
             const phoneNumber = messageContent?.replace(/[^0-9]/g, '');
             if (!phoneNumber || phoneNumber.length < 10) {
-                await sock.sendMessage(m.key.remoteJid, { 
-                    text: '❌ رقم الهاتف غير صالح. الرجاء إدخال رقم صحيح.' 
+                await sock.sendMessage(m.key.remoteJid, {
+                    text: '❌ رقم الهاتف غير صالح. الرجاء إدخال رقم صحيح.'
                 }, { quoted: m });
                 return true;
             }
-            const statusMsg = await sock.sendMessage(m.key.remoteJid, { 
-                text: `🔄 *حالة التنصيب:*\n\n⏳ جاري إنشاء ملف الاتصال لرقم ${phoneNumber}...` 
+            const statusMsg = await sock.sendMessage(m.key.remoteJid, {
+                text: `🔄 *حالة التنصيب:*\n\n⏳ جاري إنشاء ملف الاتصال لرقم ${phoneNumber}...`
             }, { quoted: m });
             const updateStatus = async (newStatus) => {
-                await sock.sendMessage(m.key.remoteJid, { 
+                await sock.sendMessage(m.key.remoteJid, {
                     text: newStatus,
                     edit: statusMsg.key
                 });
@@ -404,12 +404,13 @@ export const handleInstallationMessage = async (text, m, sock) => {
         return false;
     } catch (error) {
         console.error('خطأ في عملية التنصيب:', error);
-        await sock.sendMessage(m.key.remoteJid, { 
-            text: `❌ حدث خطأ أثناء عملية التنصيب: ${error.message}` 
+        await sock.sendMessage(m.key.remoteJid, {
+            text: `❌ حدث خطأ أثناء عملية التنصيب: ${error.message}`
         }, { quoted: m });
         return true;
     }
 };
+
 const plugin = {
     name: "InstallPlugin",
     command: ["اتصال"],
@@ -421,16 +422,16 @@ const plugin = {
     execution: async ({ sock, m, args, prefix, sleep }) => {
         try {
             if (m.key.remoteJid.endsWith('@g.us')) {
-                await sock.sendMessage(m.key.remoteJid, { 
-                    text: '❌ عذراً، يمكن استخدام أمر التنصيب في المحادثات الخاصة فقط.' 
+                await sock.sendMessage(m.key.remoteJid, {
+                    text: '❌ عذراً، يمكن استخدام أمر التنصيب في المحادثات الخاصة فقط.'
                 }, { quoted: m });
                 return;
             }
             if (args[0] === 'حذف') {
                 const phoneNumber = args[1];
                 if (!phoneNumber) {
-                    await sock.sendMessage(m.key.remoteJid, { 
-                        text: '❌ الرجاء إدخال رقم الهاتف المراد حذفه' 
+                    await sock.sendMessage(m.key.remoteJid, {
+                        text: '❌ الرجاء إدخال رقم الهاتف المراد حذفه'
                     }, { quoted: m });
                     return;
                 }
@@ -439,28 +440,28 @@ const plugin = {
                 if (fs.existsSync(folderPath)) {
                     try {
                         fs.rmSync(folderPath, { recursive: true, force: true });
-                        await sock.sendMessage(m.key.remoteJid, { 
-                            text: `✅ تم حذف البوت للرقم ${phoneNumber} بنجاح` 
+                        await sock.sendMessage(m.key.remoteJid, {
+                            text: `✅ تم حذف البوت للرقم ${phoneNumber} بنجاح`
                         }, { quoted: m });
                     } catch (error) {
-                        await sock.sendMessage(m.key.remoteJid, { 
-                            text: `❌ حدث خطأ أثناء حذف البوت: ${error.message}` 
+                        await sock.sendMessage(m.key.remoteJid, {
+                            text: `❌ حدث خطأ أثناء حذف البوت: ${error.message}`
                         }, { quoted: m });
                     }
                 } else {
-                    await sock.sendMessage(m.key.remoteJid, { 
-                        text: `❌ لا يوجد بوت مثبت للرقم ${phoneNumber}` 
+                    await sock.sendMessage(m.key.remoteJid, {
+                        text: `❌ لا يوجد بوت مثبت للرقم ${phoneNumber}`
                     }, { quoted: m });
                 }
                 return;
             }
             const senderJid = m.key.remoteJid;
             const phoneNumber = senderJid.split('@')[0];
-            const statusMsg = await sock.sendMessage(m.key.remoteJid, { 
-                text: `🔄 *جاري تنصيب البوت...*\n\n⏳ جاري إنشاء ملف الاتصال لرقمك ${phoneNumber}...` 
+            const statusMsg = await sock.sendMessage(m.key.remoteJid, {
+                text: `🔄 *جاري تنصيب البوت...*\n\n⏳ جاري إنشاء ملف الاتصال لرقمك ${phoneNumber}...`
             }, { quoted: m });
             const updateStatus = async (newStatus) => {
-                await sock.sendMessage(m.key.remoteJid, { 
+                await sock.sendMessage(m.key.remoteJid, {
                     text: newStatus,
                     edit: statusMsg.key
                 });
@@ -489,11 +490,11 @@ const plugin = {
             }, 120000);
         } catch (error) {
             console.error('خطأ في تنفيذ أمر التنصيب:', error);
-            await sock.sendMessage(m.key.remoteJid, { 
-                text: `❌ حدث خطأ أثناء تنفيذ أمر التنصيب: ${error.message}` 
+            await sock.sendMessage(m.key.remoteJid, {
+                text: `❌ حدث خطأ أثناء تنفيذ أمر التنصيب: ${error.message}`
             }, { quoted: m });
         }
     }
 };
 
-export default plugin;
+module.exports = plugin;

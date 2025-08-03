@@ -1,4 +1,3 @@
-
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
 const fs = require('fs-extra');
 const path = require('path');
@@ -46,6 +45,7 @@ function playSound(name) {
 }
 
 let lastStart = 0;
+
 async function startBot() {
     try {
         // حماية من إعادة التشغيل السريع
@@ -60,7 +60,7 @@ async function startBot() {
         console.log(chalk.hex('#FFD700').bold('\nجميع الحقوق محفوظة لـ 𝐌𝐍1 ©\n'));
         logEvent('تشغيل البوت');
 
-        playSound('kw-8.mp3');
+        playSound('ANASTASIA.mp3');
 
         const sessionDir = path.join(__dirname, 'ملف_الاتصال');
         await fs.ensureDir(sessionDir);
@@ -76,6 +76,9 @@ async function startBot() {
             markOnlineOnConnect: true,
             generateHighQualityLinkPreview: true
         });
+
+        // هنا تعيين global.sock بعد إنشاء sock مباشرة
+        global.sock = sock; // مهم جداً عشان الـ listener يقدر يرسل رسائل
 
         // Start the dashboard server and forward events
         startServer(sock.ev);

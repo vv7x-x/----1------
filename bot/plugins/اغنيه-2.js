@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = {
-    command: 'اغنية',
+    command: 'تن',
     description: '🔊 تحميل أغنية من يوتيوب وإرسالها كصوت',
     usage: '.اغنية [اسم الأغنية]',
 

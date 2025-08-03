@@ -2,35 +2,62 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>لوحة تحكم البوت</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <header>
-        <h1>لوحة تحكم البوت</h1>
-        <div id="connection-status">حالة الاتصال: غير متصل</div>
-    </header>
-    <main>
-        <section id="qr-section" class="hidden">
-            <h2>رمز الاستجابة السريعة (QR)</h2>
-            <canvas id="qr-canvas"></canvas>
-            <p>امسح رمز QR باستخدام تطبيق WhatsApp للاتصال.</p>
-        </section>
-        <section id="status-section">
-            <h2>الحالة</h2>
-            <div id="status-log"></div>
-        </section>
-        <section id="chats-section">
-            <h2>الدردشات</h2>
-            <ul id="chat-list"></ul>
-        </section>
-        <section id="messages-section">
-            <h2>الرسائل</h2>
-            <ul id="message-list"></ul>
-        </section>
-    </main>
+    <div class="container">
+        <header>
+            <h1>لوحة تحكم البوت</h1>
+            <div id="connection-status" class="status-disconnected">
+                الحالة: غير متصل
+            </div>
+        </header>
+
+        <main class="dashboard-layout">
+            <!-- Columna جانبية للدردشات والحالة -->
+            <aside class="sidebar">
+                <section id="status-section">
+                    <h2>سجل الحالة</h2>
+                    <div id="status-log" class="log-box"></div>
+                </section>
+                <section id="chats-section">
+                    <h2>الدردشات</h2>
+                    <ul id="chat-list" class="chat-list">
+                        <!-- سيتم ملء الدردشات هنا -->
+                    </ul>
+                </section>
+            </aside>
+
+            <!-- المحتوى الرئيسي للرسائل و QR -->
+            <div class="main-content">
+                <section id="qr-section">
+                    <h2>امسح الرمز للاتصال</h2>
+                    <div class="qr-container">
+                        <canvas id="qr-canvas"></canvas>
+                    </div>
+                    <p>استخدم واتساب لمسح رمز QR والاتصال بالبوت.</p>
+                </section>
+                <section id="messages-section" class="hidden">
+                    <h2>الرسائل</h2>
+                    <div id="message-container" class="message-container">
+                        <!-- سيتم عرض الرسائل هنا -->
+                    </div>
+                    <form id="message-form" class="message-form">
+                        <input type="text" id="message-input" placeholder="اكتب رسالتك..." autocomplete="off" required />
+                        <button type="submit">إرسال</button>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- مكتبة Socket.IO -->
     <script src="/socket.io/socket.io.js"></script>
+    <!-- مكتبة لرسم QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <!-- ملف الجافاسكريبت الرئيسي -->
     <script src="script.js"></script>
 </body>
 </html>

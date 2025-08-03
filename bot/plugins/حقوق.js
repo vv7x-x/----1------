@@ -3,7 +3,7 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const decorate = (text) => `╭──⪧\n🍷 *${يحيى المز}*\n╰──⪦`;
+const decorate = (text) => `╭──⪧\n🍷 *${"يحيى المز"}*\n╰──⪦ ${text}`;
 
 module.exports = {
   command: 'حقوقي',
@@ -19,19 +19,25 @@ module.exports = {
         }, { quoted: m });
       }
 
+      // تحميل الملصق
       const stream = await downloadContentFromMessage(sticker, 'sticker');
       let buffer = Buffer.from([]);
       for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
 
-      const inputWebp = path.join(__dirname, 'sticker_input.webp');
-      const tempPng = path.join(__dirname, 'sticker_temp.png');
-      const outputWebp = path.join(__dirname, 'sticker_output.webp');
+      // إنشاء الملفات المؤقتة
+      const tmpDir = path.join(__dirname, 'tmp');
+      if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
+
+      const inputWebp = path.join(tmpDir, `input_${Date.now()}.webp`);
+      const tempPng = path.join(tmpDir, `temp_${Date.now()}.png`);
+      const outputWebp = path.join(tmpDir, `output_${Date.now()}.webp`);
 
       fs.writeFileSync(inputWebp, buffer);
 
+      // أمر FFmpeg لإضافة الحقوق
       const ffmpegCmd = `
-        ffmpeg -y -i "${inputWebp}" -vf "drawtext=text='KING':fontcolor=white:fontsize=32:x=w-text_w-10:y=h-text_h-10" "${tempPng}" &&
-        ffmpeg -y -i "${tempPng}" -vcodec libwebp -lossless 1 -q:v 80 -preset default -loop 0 -an -vsync 0 "${outputWebp}"
+        ffmpeg -y -i "${inputWebp}" -vf "drawtext=text='KING':fontcolor=white:fontsize=30:box=1:boxcolor=black@0.5:boxborderw=5:x=w-tw-10:y=h-th-10" "${tempPng}" &&
+        ffmpeg -y -i "${tempPng}" -vcodec libwebp -lossless 1 -q:v 80 -preset default -loop 0 -an -vsync 0 -s 512:512 "${outputWebp}"
       `;
 
       exec(ffmpegCmd, async (err) => {
@@ -42,13 +48,13 @@ module.exports = {
           }, { quoted: m });
         }
 
-        const webp = fs.readFileSync(outputWebp);
-        await sock.sendMessage(m.key.remoteJid, { sticker: webp }, { quoted: m });
+        const finalSticker = fs.readFileSync(outputWebp);
+        await sock.sendMessage(m.key.remoteJid, { sticker: finalSticker }, { quoted: m });
 
         // تنظيف الملفات
-        fs.unlinkSync(inputWebp);
-        fs.unlinkSync(tempPng);
-        fs.unlinkSync(outputWebp);
+        [inputWebp, tempPng, outputWebp].forEach(file => {
+          if (fs.existsSync(file)) fs.unlinkSync(file);
+        });
       });
 
     } catch (err) {

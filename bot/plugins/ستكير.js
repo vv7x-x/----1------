@@ -1,6 +1,8 @@
 const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
+const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
+const { Buffer } = require('buffer');
 
 module.exports = {
   command: 'حقوق',
@@ -23,47 +25,47 @@ module.exports = {
     }
 
     try {
-      const buffer = await sock.downloadMediaMessage({
-        key: {
-          remoteJid: jid,
-          id: msg.message.extendedTextMessage.contextInfo.stanzaId,
-          fromMe: false,
-          participant: msg.message.extendedTextMessage.contextInfo.participant
-        },
-        message: quoted
-      });
+      // تنزيل الاستيكر من الرسالة المقتبسة
+      const mediaMessage = quoted.stickerMessage;
+      const stream = await downloadContentFromMessage(mediaMessage, 'webp');
 
-      if (!buffer) {
+      let buffer = Buffer.from([]);
+      for await (const chunk of stream) {
+        buffer = Buffer.concat([buffer, chunk]);
+      }
+
+      if (!buffer || buffer.length === 0) {
         return sock.sendMessage(jid, { text: '❌ لم أستطع تحميل الاستيكر.' }, { quoted: msg });
       }
 
-      // حفظ الملف مؤقتاً
+      // حفظ الاستيكر مؤقتاً
       const tempInput = path.join(__dirname, 'temp.webp');
       const tempOutput = path.join(__dirname, 'output.webp');
       fs.writeFileSync(tempInput, buffer);
 
-      // تحويل إلى png ثم تعديل وإضافة الحقوق ثم تحويل مجددًا إلى webp
+      // تعديل الصورة بإضافة النص
       const pngBuffer = await sharp(tempInput).png().toBuffer();
+      const svgText = `
+        <svg width="512" height="512">
+          <style>
+            .title { fill: white; font-size: 40px; font-weight: bold; font-family: Arial, sans-serif; }
+          </style>
+          <text x="10" y="50" class="title">${caption}</text>
+        </svg>`;
+
       const imageWithText = await sharp(pngBuffer)
-        .composite([{
-          input: Buffer.from(
-            `<svg>
-              <text x="10" y="20" font-size="20" fill="white">${caption}</text>
-            </svg>`
-          ),
-          top: 5,
-          left: 5
-        }])
+        .composite([{ input: Buffer.from(svgText), top: 0, left: 0 }])
         .webp()
         .toBuffer();
 
-      // إرسال الاستيكر الجديد
+      // إرسال الاستيكر المعدل
       await sock.sendMessage(jid, {
         sticker: imageWithText
       }, { quoted: msg });
 
-      // تنظيف الملفات
+      // حذف الملفات المؤقتة
       fs.unlinkSync(tempInput);
+
     } catch (err) {
       console.error('🛑 خطأ في أمر حقوق:', err);
       return sock.sendMessage(jid, {

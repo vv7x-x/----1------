@@ -14,7 +14,9 @@ export let eliteNumbers = [
   '57707767832672',
   '201155528093',
   '52300286529652',
-   '201201419352'
+   '201201419352',
+   ' 201117693809'
+   
 ];
 
 export const extractPureNumber = (jid) => {

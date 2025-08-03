@@ -1,20 +1,15 @@
-import pkg from 'google-libphonenumber';
-const { PhoneNumberUtil, PhoneNumberFormat } = pkg;
+const pkg = require('google-libphonenumber');
+const { PhoneNumberUtil } = pkg;
 
-// دالة للحصول على اسم الدولة ورمز البلد
 function getCountryByPhoneNumber(phoneNumber) {
   const phoneUtil = PhoneNumberUtil.getInstance();
 
   try {
-    // إضافة "+" إذا لم يكن الرقم يحتوي عليها
     if (!phoneNumber.startsWith('+')) {
       phoneNumber = '+' + phoneNumber;
     }
-
-    // تأكد من أن الرقم يحتوي على رمز الدولة بشكل صحيح
     const number = phoneUtil.parseAndKeepRawInput(phoneNumber, 'ZZ');
     const regionCode = phoneUtil.getRegionCodeForNumber(number);
-    
     return regionCode;
   } catch (error) {
     console.error('Invalid phone number:', error);
@@ -22,22 +17,18 @@ function getCountryByPhoneNumber(phoneNumber) {
   }
 }
 
-// دالة للحصول على اسم العاصمة بناءً على رمز البلد
 function getCapitalCityByCountry(countryCode) {
   const capitals = {
-    'MA': 'الرباط',  // المغرب
-    'EG': 'القاهرة', // مصر
-    'US': 'واشنطن',  // الولايات المتحدة
-    'FR': 'باريس',    // فرنسا
-    'DE': 'برلين',    // ألمانيا
-    'IT': 'روما',     // إيطاليا
-    // أضف المزيد من الدول حسب الحاجة
+    'MA': 'الرباط',
+    'EG': 'القاهرة',
+    'US': 'واشنطن',
+    'FR': 'باريس',
+    'DE': 'برلين',
+    'IT': 'روما',
   };
-
   return capitals[countryCode] || 'غير معروف';
 }
 
-// دالة للحصول على اسم الدولة باللغة العربية بناءً على رمز البلد
 function getCountryNameInArabic(countryCode) {
   const countries = {
     'MA': 'المغرب',
@@ -46,23 +37,23 @@ function getCountryNameInArabic(countryCode) {
     'FR': 'فرنسا',
     'DE': 'ألمانيا',
     'IT': 'إيطاليا',
-    // أضف المزيد من الدول حسب الحاجة
   };
-
   return countries[countryCode] || 'دولة غير معروفة';
 }
 
-export default {
+module.exports = {
   name: 'تهكير',
   command: ['تهكير'],
-  description: 'يُظهر معلومات الجهاز  للمستخدم المشار إلي "مجرد مزحة"',
-  execution: async ({ sock, m }) => {
+  description: 'يُظهر معلومات الجهاز للمستخدم المشار إليه (مجرد مزحة)',
+  async execute(sock, m) {
     try {
-      const mentionedJid = m.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0];
+      const contextInfo = m.message?.extendedTextMessage?.contextInfo;
+      const mentionedJid = contextInfo?.mentionedJid?.[0];
+
       if (!mentionedJid) {
         return await sock.sendMessage(m.key.remoteJid, {
-          text: "❌ يرجى منشنة الرقم للحصول على معلوماته.",
-        });
+          text: "❌ يرجى منشن الرقم للحصول على معلوماته.",
+        }, { quoted: m });
       }
 
       const phoneNumber = mentionedJid.split('@')[0];
@@ -70,26 +61,21 @@ export default {
       if (!countryCode) {
         return await sock.sendMessage(m.key.remoteJid, {
           text: "❌ الرقم المدخل غير صالح.",
-        });
+        }, { quoted: m });
       }
 
       const capitalCity = getCapitalCityByCountry(countryCode);
       const countryName = getCountryNameInArabic(countryCode);
-
       const language = countryCode === 'MA' ? 'الفرنسية' : 'العربية';
       const generateRandomIpSegment = () => Math.floor(Math.random() * 256);
       const ip = `192.${generateRandomIpSegment()}.${generateRandomIpSegment()}.${generateRandomIpSegment()}`;
-
       const batteryStatus = "غير معروف";
 
-      let message = `
-🔍 **معلومات الجهاز:**
------------------------------
-`;
+      let message = `🔍 **معلومات الجهاز:**\n-----------------------------\n`;
 
       const countdownMessage = await sock.sendMessage(m.key.remoteJid, {
         text: "_جارِ جمع معلومات الجهاز..._",
-      });
+      }, { quoted: m });
 
       const lines = [
         "📱 **نوع الجهاز:** اندرويد",
@@ -112,26 +98,26 @@ export default {
       ];
 
       let currentMessage = "_جارِ جمع معلومات الجهاز..._";
-      
       let index = 0;
-      const interval = setInterval(() => {
+
+      const interval = setInterval(async () => {
         if (index < lines.length) {
           currentMessage += `\n${lines[index]}`;
-          sock.sendMessage(m.key.remoteJid, {
-            edit: countdownMessage.key,
+          await sock.sendMessage(m.key.remoteJid, {
             text: currentMessage,
+            edit: countdownMessage.key,
           });
           index++;
         } else {
           clearInterval(interval);
         }
-      }, 500); 
+      }, 500);
 
     } catch (error) {
       console.error(error);
       await sock.sendMessage(m.key.remoteJid, {
         text: "❌ حدث خطأ أثناء جلب معلومات الرقم.",
-      });
+      }, { quoted: m });
     }
   },
 };

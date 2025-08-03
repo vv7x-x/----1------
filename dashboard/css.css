@@ -1,0 +1,192 @@
+:root {
+    --bg-color: #1a1a1a;
+    --primary-color: #2a2a2a;
+    --secondary-color: #3a3a3a;
+    --text-color: #e0e0e0;
+    --accent-color: #4caf50;
+    --accent-hover: #66bb6a;
+    --error-color: #f44336;
+    --warning-color: #ff9800;
+    --font-family: 'Tajawal', sans-serif; /* خط عربي جميل إذا كان متاحاً */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+#connection-status {
+    padding: 5px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.status-connected { background-color: var(--accent-color); color: white; }
+.status-disconnected { background-color: var(--error-color); color: white; }
+.status-pending { background-color: var(--warning-color); color: #1a1a1a; }
+
+.dashboard-layout {
+    display: flex;
+    gap: 20px;
+}
+
+.sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.main-content {
+    flex: 3;
+}
+
+section {
+    background-color: var(--primary-color);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--secondary-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    color: var(--accent-color);
+}
+
+.log-box, .chat-list, .message-container {
+    background-color: var(--secondary-color);
+    border-radius: 5px;
+    padding: 10px;
+    height: 250px;
+    overflow-y: auto;
+}
+/* تخصيص شريط التمرير */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--secondary-color); }
+::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #777; }
+
+
+#qr-section {
+    text-align: center;
+}
+.qr-container {
+    background: white;
+    padding: 20px;
+    display: inline-block;
+    border-radius: 8px;
+}
+#qr-canvas {
+    width: 250px !important;
+    height: 250px !important;
+}
+
+
+.chat-list {
+    list-style: none;
+    padding: 0;
+}
+.chat-list-item {
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--primary-color);
+    transition: background-color 0.2s;
+}
+.chat-list-item:last-child {
+    border-bottom: none;
+}
+.chat-list-item:hover {
+    background-color: #4e4e4e;
+}
+.chat-list-item.active {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: bold;
+}
+
+
+#message-container {
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.message {
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 70%;
+    word-wrap: break-word;
+}
+.message-received {
+    background-color: #4a4a4a;
+    align-self: flex-start; /* رسالة مستلمة على اليسار */
+}
+.message-sent {
+    background-color: var(--accent-color);
+    align-self: flex-end; /* رسالة مرسلة على اليمين */
+}
+.message .sender {
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #b0b0b0;
+}
+.message-sent .sender {
+    color: #e0e0e0;
+}
+
+
+.message-form {
+    display: flex;
+    margin-top: 15px;
+}
+#message-input {
+    flex-grow: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 20px 0 0 20px;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+}
+#message-input:focus {
+    outline: none;
+    background-color: #454545;
+}
+.message-form button {
+    padding: 12px 20px;
+    border: none;
+    background-color: var(--accent-color);
+    color: white;
+    cursor: pointer;
+    border-radius: 0 20px 20px 0;
+    transition: background-color 0.2s;
+}
+.message-form button:hover {
+    background-color: var(--accent-hover);
+}
+
+.hidden {
+    display: none;
+}
