@@ -5,6 +5,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const { isElite } = require('../haykala/elite');
 const { playSound } = require('../main');
+const { incrementMessage, incrementCommand } = require('../utils/stats');
 
 const commands = new Map();
 
@@ -32,12 +33,12 @@ async function handleMessages(sock, { messages }) {
     try {
         message = messages[0];
         if (!message) return;
+        await incrementMessage();
 
         const body = message.message?.conversation ||
                      message.message?.extendedTextMessage?.text ||
                      message.message?.imageMessage?.caption ||
                      message.message?.videoMessage?.caption || '';
-
         if (!body) return;
 
         const currentPrefix = config.prefix;
@@ -61,13 +62,11 @@ async function handleMessages(sock, { messages }) {
             logger.warn('تعذر قراءة ملف bot.txt:', err.message);
         }
 
-      
         if (botStatus === '[off]' && commandWithoutPrefix !== 'bot') {
             logger.warn(`البوت موقوف. تجاهل الأمر: ${commandWithoutPrefix}`);
             return;
         }
 
-        
         let senderNumber;
         if (message.key.remoteJid.endsWith('@g.us')) {
             senderNumber = message.key.participant?.split('@')[0] || '';
@@ -126,6 +125,7 @@ async function handleMessages(sock, { messages }) {
             throw new Error('المعالج غير صالح: لا توجد دالة execute');
         }
 
+        await incrementCommand(commandWithoutPrefix);
         logger.success(`تم تنفيذ الأمر: ${command}`);
     } catch (error) {
         logger.error(`✗ خطأ في معالجة الرسالة: ${error.stack}`);

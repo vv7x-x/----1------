@@ -5,7 +5,6 @@ const chalk = require('chalk');
 const readline = require('readline');
 const { exec } = require('child_process');
 const logger = require('./utils/console');
-const { startServer } = require('./server');  // Import startServer
 
 // تسجيل الأحداث في ملف log
 function logEvent(event) {
@@ -79,10 +78,6 @@ async function startBot() {
 
         // هنا تعيين global.sock بعد إنشاء sock مباشرة
         global.sock = sock; // مهم جداً عشان الـ listener يقدر يرسل رسائل
-
-        // Start the dashboard server and forward events
-        startServer(sock.ev);
-
         sock.ev.on('groups.upsert', async (groups) => {
             for (const group of groups) {
                 try {

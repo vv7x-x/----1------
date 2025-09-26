@@ -4,6 +4,7 @@ module.exports = {
     botName: 'kw-8',
     version: '2.5.0',
     owner: '972532731932',
+    owners: ['972532731932'],
 
     defaultPrefix: '.',
     get prefix() {

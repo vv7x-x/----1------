@@ -1,6 +1,5 @@
 // استيراد الألوان من ملف الإعدادات
 const { colors } = require('../config');
-const crypto = require('crypto');
 
 // كائن يحتوي على دوال تسجيل الرسائل المختلفة
 const logger = {

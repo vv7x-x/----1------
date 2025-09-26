@@ -1,0 +1,16 @@
+node_modules/
+ملف_الاتصال/
+data/*.log
+data/*.json
+temp/
+tmp/
+media/
+*.mp3
+ffmpeg.exe
+ffprobe.exe
+ffplay.exe
+.env
+.DS_Store
+
+# Logs directory
+logs/
