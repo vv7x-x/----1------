@@ -5,6 +5,7 @@ const chalk = require('chalk');
 const readline = require('readline');
 const { exec } = require('child_process');
 const logger = require('./utils/console');
+const { applyPersonaText } = require('./utils/impersonation');
 
 // تسجيل الأحداث في ملف log
 function logEvent(event) {
@@ -75,6 +76,22 @@ async function startBot() {
             markOnlineOnConnect: true,
             generateHighQualityLinkPreview: true
         });
+
+        // Patch sendMessage to apply impersonation persona per chat for text/caption
+        const _origSendMessage = sock.sendMessage.bind(sock);
+        sock.sendMessage = async (jid, content, options) => {
+            try {
+                if (content && typeof content === 'object') {
+                    if (content.text) {
+                        content.text = await applyPersonaText(jid, content.text);
+                    }
+                    if (content.caption) {
+                        content.caption = await applyPersonaText(jid, content.caption);
+                    }
+                }
+            } catch {}
+            return _origSendMessage(jid, content, options);
+        };
 
         // هنا تعيين global.sock بعد إنشاء sock مباشرة
         global.sock = sock; // مهم جداً عشان الـ listener يقدر يرسل رسائل
